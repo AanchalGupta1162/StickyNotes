@@ -1,0 +1,23 @@
+{
+    "testId": "7ce8aa9f-1de8-42ef-af0d-60e7807cab8b",
+    "name": "Notes",
+    "version": "1.0.0",
+    "manifestVersion": 2,
+    "requirements": {
+        "experimentalApis": true,
+        "apps": [
+            {
+                "name": "Express",
+                "apiVersion": 1
+            }
+        ]
+    },
+    "entryPoints": [
+        {
+            "type": "panel",
+            "id": "panel1",
+            "main": "index.html",
+            "documentSandbox": "sandbox/code.js"
+        }
+    ]
+}
