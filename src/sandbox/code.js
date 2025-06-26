@@ -20,8 +20,6 @@ function start() {
             return raw
                 .split('\n')
                 .map(line => {
-                    if (/^\[ \]\s?/.test(line)) return '\u2610 ' + line.replace(/^\[ \]\s?/, ''); // ☐
-                    if (/^\[x\]\s?/i.test(line)) return '\u2611 ' + line.replace(/^\[x\]\s?/i, ''); // ☑
                     if (/^-\s?/.test(line)) return '\u2022 ' + line.replace(/^-\s?/, ''); // •
                     return line;
                 })
@@ -56,13 +54,13 @@ function start() {
         text.fullContent.applyCharacterStyles(
             {
                 color: { red: 0, green: 0.4, blue: 0.8, alpha: 1 },
-                fontSize: Math.max(8, Math.min(24, height * 0.15)),
+                fontSize: 12,
                 letterSpacing: 10,
                 underline: true,
             }
             );
         // Padding: 10px from left/top
-        text.translation = { x: rect.translation.x +120, y: rect.translation.y +90 }; // Position text inside the rectangle
+        text.translation = { x: rect.translation.x + 20, y: rect.translation.y + 30 }; // Position text inside the rectangle
 
         // Group rectangle and text if possible
         const group = editor.createGroup();
