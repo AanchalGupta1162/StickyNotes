@@ -8,6 +8,10 @@ function start() {
     // APIs to be exposed to the UI runtime
     // i.e., to the `index.html` file of this add-on.
     const sandboxApi = {};
+    
+    // Store references to created notes for hide/show/delete functionality
+    let currentNote = null;
+    let isNoteHidden = false;
     sandboxApi.createStickyNote = function(options) {
         console.log("[Sandbox] createStickyNote called", options);
         options = options || {};
@@ -50,23 +54,47 @@ function start() {
 
         // Create the text object for the sticky note
         const text = editor.createText(textContent);
-        // Font size: about 15% of note height, clamped between 8 and 24
-        text.fullContent.applyCharacterStyles(
-            {
-                color: { red: 0, green: 0.4, blue: 0.8, alpha: 1 },
-                fontSize: 12,
-                letterSpacing: 10,
-                underline: true,
-            }
-            );
-        // Padding: 10px from left/top
-        text.translation = { x: rect.translation.x + 20, y: rect.translation.y + 30 }; // Position text inside the rectangle
+        // Font customization
+        const fontSize = options.fontSize || 12;
+        // Convert hex color to {red, green, blue, alpha}
+        function hexToRgbA(hex) {
+            let c = hex.substring(1);
+            if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+            const num = parseInt(c, 16);
+            return {
+                red: ((num >> 16) & 255) / 255,
+                green: ((num >> 8) & 255) / 255,
+                blue: (num & 255) / 255,
+                alpha: 1
+            };
+        }
+        const fontColor = options.fontColor ? hexToRgbA(options.fontColor) : { red: 0, green: 0, blue: 0, alpha: 1 };
+        const fontFamily = options.fontFamily || "Arial";
+        text.fullContent.applyCharacterStyles({
+            color: fontColor,
+            fontSize: fontSize,
+            fontFamily: fontFamily
+        });
+        
+        // Set text bounds to fit within the rectangle with padding
+        const padding = 15;
+        text.areaBox = {
+            width: width - (padding * 2),
+            height: height - (padding * 2)
+        };
+        
+        // Position text inside the rectangle with padding
+        text.translation = { x: rect.translation.x + padding, y: rect.translation.y + padding };
 
         // Group rectangle and text if possible
         const group = editor.createGroup();
         group.translation = { x: 10, y: 10 }; // Align group to the same position as the rectangle
         group.children.append(rect,text);
         editor.context.insertionParent.children.append(group);
+        
+        // Store reference to the current note
+        currentNote = group;
+        isNoteHidden = false;
         // Add to the document
         // const insertionParent = editor.context.insertionParent;
         // if (group) {
@@ -79,6 +107,46 @@ function start() {
         // const insertionParent = editor.context.insertionParent;
         // insertionParent.children.append(rect);
         // insertionParent.children.append(text);
+    };
+    
+    // Toggle note visibility using opacity
+    sandboxApi.toggleNoteVisibility = function() {
+        console.log("[Sandbox] toggleNoteVisibility called");
+        if (!currentNote) {
+            console.log("No note to hide/show");
+            return;
+        }
+        
+        if (isNoteHidden) {
+            // Show the note
+            currentNote.opacity = 1;
+            isNoteHidden = false;
+            console.log("Note shown");
+        } else {
+            // Hide the note
+            currentNote.opacity = 0.5; // Very transparent but still selectable
+            isNoteHidden = true;
+            console.log("Note hidden");
+        }
+    };
+    
+    // Delete the selected note
+    sandboxApi.deleteSelectedNote = function() {
+        console.log("[Sandbox] deleteSelectedNote called");
+        if (!currentNote) {
+            console.log("No note to delete");
+            return;
+        }
+        
+        try {
+            // Remove the note from the document
+            currentNote.removeFromParent();
+            currentNote = null;
+            isNoteHidden = false;
+            console.log("Note deleted");
+        } catch (error) {
+            console.error("Error deleting note:", error);
+        }
     };
 
     // Expose `sandboxApi` to the UI runtime.

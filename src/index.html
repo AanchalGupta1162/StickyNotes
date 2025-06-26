@@ -1,5 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html la            .container {
+                padding: 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                max-width: 280px;
+                margin: 0 auto;
+            }
     <head>
         <meta charset="UTF-8" />
         <meta
@@ -24,28 +31,28 @@
             }
 
             .container {
-                padding: 24px;
+                padding: 12px;
                 display: flex;
                 flex-direction: column;
-                gap: 16px;
-                max-width: 300px;
+                gap: 6px;
+                max-width: 280px;
                 margin: 0 auto;
             }
 
             .tab-bar {
                 display: flex;
                 border-bottom: 1px solid #e9ecef;
-                margin-bottom: 24px;
+                margin-bottom: 8px;
                 position: relative;
             }
 
             .tab-btn {
                 background: none !important;
                 border: none;
-                padding: 16px 0;
-                margin-right: 32px;
+                padding: 8px 0;
+                margin-right: 20px;
                 color: #6c757d;
-                font-size: 14px;
+                font-size: 12px;
                 font-weight: 500;
                 cursor: pointer;
                 transition: color 0.2s ease;
@@ -93,26 +100,26 @@
 
             .header {
                 text-align: center;
-                margin-bottom: 8px;
+                margin-bottom: 4px;
             }
 
             .header h1 {
                 color: #2c2c2c;
-                font-size: 24px;
+                font-size: 16px;
                 font-weight: 600;
                 text-shadow: none;
             }
 
             .controls-section {
                 background: white;
-                border-radius: 12px;
-                padding: 20px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                border-radius: 6px;
+                padding: 10px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
                 border: 1px solid #e9ecef;
             }
 
             .form-group {
-                margin-bottom: 16px;
+                margin-bottom: 6px;
             }
 
             .form-group:last-child {
@@ -121,17 +128,17 @@
 
             label {
                 display: block;
-                margin-bottom: 6px;
+                margin-bottom: 3px;
                 font-weight: 500;
                 color: #6c757d;
-                font-size: 14px;
+                font-size: 12px;
             }
 
             input[type="color"] {
                 width: 100%;
-                height: 44px;
+                height: 36px;
                 border: 1px solid #dee2e6;
-                border-radius: 8px;
+                border-radius: 6px;
                 cursor: pointer;
                 transition: border-color 0.2s ease;
             }
@@ -142,11 +149,11 @@
 
             input[type="number"] {
                 width: 100%;
-                height: 44px;
+                height: 36px;
                 border: 1px solid #dee2e6;
-                border-radius: 8px;
-                padding: 0 12px;
-                font-size: 14px;
+                border-radius: 6px;
+                padding: 0 10px;
+                font-size: 13px;
                 transition: border-color 0.2s ease, box-shadow 0.2s ease;
             }
 
@@ -159,21 +166,21 @@
             .size-inputs {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 12px;
+                gap: 6px;
             }
 
             button {
                 width: 100%;
-                height: 44px;
+                height: 32px;
                 background: #495057;
                 border: none;
-                border-radius: 8px;
+                border-radius: 4px;
                 color: white;
-                font-size: 16px;
+                font-size: 12px;
                 font-weight: 600;
                 cursor: pointer;
                 transition: background-color 0.2s ease, transform 0.1s ease;
-                margin-top: 8px;
+                margin-top: 2px;
             }
 
             button:hover:not(:disabled) {
@@ -194,15 +201,15 @@
             .divider {
                 height: 1px;
                 background: #dee2e6;
-                margin: 16px 0;
+                margin: 6px 0;
             }
 
             textarea {
                 width: 100%;
                 border: 1px solid #dee2e6;
-                border-radius: 8px;
-                padding: 12px;
-                font-size: 14px;
+                border-radius: 6px;
+                padding: 10px;
+                font-size: 13px;
                 color: #495057;
                 resize: none;
                 transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -344,15 +351,46 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="noteText">Note Content</label>
-                        <textarea id="noteText" rows="4" placeholder="Type your note here."></textarea>
+                        <label>Font Options</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 3px;">
+                                <label for="fontSize" style="margin: 0; font-size: 11px; min-width: 26px;">Size</label>
+                                <input type="number" id="fontSize" value="12" min="8" max="36" style="flex: 1; height: 28px; font-size: 11px;">
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 3px;">
+                                <label for="fontColor" style="margin: 0; font-size: 11px;">Color</label>
+                                <input type="color" id="fontColor" value="#000000" style="flex: 1; height: 28px; padding: 2px;">
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <label for="fontFamily" style="margin: 0; font-size: 11px; min-width: 30px;">Font</label>
+                            <select id="fontFamily" style="flex: 1; height: 28px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 11px; padding: 0 6px;">
+                                <option value="Arial">Arial</option>
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Courier New">Courier New</option>
+                            </select>
+                        </div>
                     </div>
+
                     <div class="form-group">
-                        <label>Preview</label>
-                        <div id="notePreview" class="note-preview" style="min-height:60px; background:#f8f9fa; border:1px solid #dee2e6; border-radius:8px; padding:12px; font-size:14px; color:#495057;"></div>
+                        <label for="noteText">Note Content</label>
+                        <textarea id="noteText" rows="2" placeholder="Type your note here. Use - for bullet."></textarea>
                     </div>
                     
-                    <button id="createStickyNote" disabled>✨ Create Sticky Note</button>
+                    <div class="form-group">
+                        <label>Note Actions</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                            <button id="createStickyNote" disabled style="margin-top: 0;">Create Note</button>
+                            <button id="hideShowNote" disabled style="margin-top: 0; background: #6c757d;">Hide/Show</button>
+                        </div>
+                        <button id="deleteNote" disabled style="margin-top: 6px; background: #dc3545;">Delete Selected</button>
+                    </div>
                 </div>
             </div>
 

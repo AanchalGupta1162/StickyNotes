@@ -13,11 +13,15 @@ addOnUISdk.ready.then(async () => {
     const sandboxProxy = await runtime.apiProxy("documentSandbox");
 
     const createStickyNoteButton = document.getElementById("createStickyNote");
+    const hideShowNoteButton = document.getElementById("hideShowNote");
+    const deleteNoteButton = document.getElementById("deleteNote");
     const noteColorInput = document.getElementById("noteColor");
     const noteWidthInput = document.getElementById("noteWidth");
     const noteHeightInput = document.getElementById("noteHeight");
     const noteTextInput = document.getElementById("noteText");
-    const notePreview = document.getElementById("notePreview");
+    const fontSizeInput = document.getElementById("fontSize");
+    const fontColorInput = document.getElementById("fontColor");
+    const fontFamilyInput = document.getElementById("fontFamily");
 
     // Tab switching logic and notes storage
     const tabViewBtn = document.getElementById("tab-view");
@@ -91,24 +95,16 @@ addOnUISdk.ready.then(async () => {
         });
     }
 
-    // Live preview logic
-    function renderPreview(text) {
-        // Convert - to bullet
-        let html = text
-            .replace(/\n/g, '<br>')
-            .replace(/^- (.*)$/gm, '<span style="display:inline-block;width:1em;">•</span> $1');
-        notePreview.innerHTML = html;
-    }
-    noteTextInput.addEventListener("input", e => renderPreview(noteTextInput.value));
-    renderPreview(noteTextInput.value);
-
     createStickyNoteButton.addEventListener("click", async event => {
-        // Get color, size, and text values
+        // Get color, size, text, and font options
         const colorHex = noteColorInput.value;
         const width = parseInt(noteWidthInput.value, 10);
         const height = parseInt(noteHeightInput.value, 10);
         const text = noteTextInput.value;
-        await sandboxProxy.createStickyNote({ colorHex, width, height, text });
+        const fontSize = parseInt(fontSizeInput.value, 10);
+        const fontColor = fontColorInput.value;
+        const fontFamily = fontFamilyInput.value;
+        await sandboxProxy.createStickyNote({ colorHex, width, height, text, fontSize, fontColor, fontFamily });
         // Add to notes list and switch to view tab
         notes.push({
             colorHex,
@@ -123,5 +119,18 @@ addOnUISdk.ready.then(async () => {
         switchTab("view");
     });
     createStickyNoteButton.disabled = false;
+    
+    // Hide/Show note functionality
+    hideShowNoteButton.addEventListener("click", async event => {
+        await sandboxProxy.toggleNoteVisibility();
+    });
+    hideShowNoteButton.disabled = false;
+    
+    // Delete note functionality
+    deleteNoteButton.addEventListener("click", async event => {
+        await sandboxProxy.deleteSelectedNote();
+    });
+    deleteNoteButton.disabled = false;
+    
     renderNotesList();
 });
