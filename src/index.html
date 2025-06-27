@@ -271,7 +271,56 @@
                 align-items: center;
             }
 
-            .delete-note-btn {
+            .note-actions {
+                display: flex;
+                gap: 4px;
+            }
+
+            .hide-note-btn, .delete-note-btn {
+                position: static;
+                background: rgba(255,255,255,0.8);
+                border: none;
+                border-radius: 4px;
+                width: 24px;
+                height: 24px;
+                color: #666;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                opacity: 1;
+                margin: 0;
+            }
+
+            .hide-note-btn:hover {
+                background: rgba(255,255,255,0.95);
+                color: #495057;
+            }
+
+            .delete-note-btn:hover {
+                background: rgba(255,255,255,0.95);
+                color: #dc3545;
+            }
+
+            .hide-note-btn.hidden svg {
+                text-decoration: line-through;
+                position: relative;
+            }
+
+            .hide-note-btn.hidden svg::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: currentColor;
+                transform: translateY(-50%) rotate(-10deg);
+            }
+
+            /* Remove the old delete button styles since we're replacing them */
+            .delete-note-btn.old-style {
                 position: absolute;
                 top: 8px;
                 right: 8px;
@@ -290,11 +339,11 @@
                 transition: opacity 0.2s ease, background-color 0.2s ease;
             }
 
-            .note-card:hover .delete-note-btn {
+            .note-card:hover .delete-note-btn.old-style {
                 opacity: 1;
             }
 
-            .delete-note-btn:hover {
+            .delete-note-btn.old-style:hover {
                 background: rgba(255,255,255,0.95);
                 color: #dc3545;
             }
@@ -384,12 +433,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Note Actions</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                            <button id="createStickyNote" disabled style="margin-top: 0;">Create Note</button>
-                            <button id="hideShowNote" disabled style="margin-top: 0; background: #6c757d;">Hide/Show</button>
-                        </div>
-                        <button id="deleteNote" disabled style="margin-top: 6px; background: #dc3545;">Delete Selected</button>
+                        <button id="createStickyNote" disabled style="margin-top: 0;">Create Note</button>
                     </div>
                 </div>
             </div>
@@ -399,6 +443,7 @@
                     <label>Created Notes</label>
                     <div id="notesList" class="notes-grid"></div>
                 </div>
+                <!-- Removed global Note Actions buttons -->
             </div>
         </div>
 

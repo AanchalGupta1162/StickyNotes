@@ -9,9 +9,14 @@ function start() {
     // i.e., to the `index.html` file of this add-on.
     const sandboxApi = {};
     
-    // Store references to created notes for hide/show/delete functionality
-    let currentNote = null;
-    let isNoteHidden = false;
+    // Helper to generate a unique ID
+    function generateNoteId() {
+        return typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : "note-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
+    }
+
+    // Create a sticky note
     sandboxApi.createStickyNote = function(options) {
         console.log("[Sandbox] createStickyNote called", options);
         options = options || {};
@@ -51,9 +56,16 @@ function start() {
         rect.translation = { x: 10, y: 10 };
         const rectFill = editor.makeColorFill(color);
         rect.fill = rectFill;
+        // Add rounded corners to the rectangle
+        rect.cornerRadii = { topLeft: 12, topRight: 12, bottomLeft: 12, bottomRight: 12 };
 
         // Create the text object for the sticky note
         const text = editor.createText(textContent);
+        text.setPositionInParent(
+            { x: 10, y:10  },
+            { x: 10, y: 10 }
+        );
+        text.textAlignment=1; // Align text to the left
         // Font customization
         const fontSize = options.fontSize || 12;
         // Convert hex color to {red, green, blue, alpha}
@@ -93,8 +105,20 @@ function start() {
         editor.context.insertionParent.children.append(group);
         
         // Store reference to the current note
-        currentNote = group;
-        isNoteHidden = false;
+        const noteId = rect.id.toString();
+        const meta = {
+            id: noteId,
+            color: colorHex,
+            width,
+            height,
+            text: options.text,
+            fontSize,
+            fontColor: options.fontColor,
+            fontFamily: options.fontFamily
+        };
+        group.addOnData.setItem("noteId", noteId);
+        group.addOnData.setItem("meta", JSON.stringify(meta));
+        
         // Add to the document
         // const insertionParent = editor.context.insertionParent;
         // if (group) {
@@ -109,44 +133,58 @@ function start() {
         // insertionParent.children.append(text);
     };
     
-    // Toggle note visibility using opacity
-    sandboxApi.toggleNoteVisibility = function() {
-        console.log("[Sandbox] toggleNoteVisibility called");
-        if (!currentNote) {
-            console.log("No note to hide/show");
-            return;
+    // Get all notes (groups with noteId in addOnData)
+    sandboxApi.getAllNotes = function() {
+        const notes = [];
+        const allNodes = editor.context.insertionParent.children;
+        for (const node of allNodes) {
+            if (node.addOnData && node.addOnData.getItem("noteId")) {
+                const meta = JSON.parse(node.addOnData.getItem("meta") || "{}");
+                notes.push({
+                    id: node.addOnData.getItem("noteId"),
+                    meta: meta,
+                    isHidden: node.opacity !== 1
+                    // Do NOT return node: node here! Only serializable data.
+                });
+            }
         }
-        
-        if (isNoteHidden) {
-            // Show the note
-            currentNote.opacity = 1;
-            isNoteHidden = false;
-            console.log("Note shown");
-        } else {
-            // Hide the note
-            currentNote.opacity = 0.5; // Very transparent but still selectable
-            isNoteHidden = true;
-            console.log("Note hidden");
-        }
+        return notes;
     };
-    
-    // Delete the selected note
-    sandboxApi.deleteSelectedNote = function() {
-        console.log("[Sandbox] deleteSelectedNote called");
-        if (!currentNote) {
-            console.log("No note to delete");
-            return;
+
+    // Select a note by ID
+    sandboxApi.selectNoteById = function(noteId) {
+        const allNodes = editor.context.insertionParent.children;
+        for (const node of allNodes) {
+            if (node.addOnData && node.addOnData.getItem("noteId") === noteId) {
+                editor.context.selection = [node];
+                return true;
+            }
         }
-        
-        try {
-            // Remove the note from the document
-            currentNote.removeFromParent();
-            currentNote = null;
-            isNoteHidden = false;
-            console.log("Note deleted");
-        } catch (error) {
-            console.error("Error deleting note:", error);
+        return false;
+    };
+
+    // Toggle note visibility by ID
+    sandboxApi.toggleNoteVisibilityById = function(noteId) {
+        const allNodes = editor.context.insertionParent.children;
+        for (const node of allNodes) {
+            if (node.addOnData && node.addOnData.getItem("noteId") === noteId) {
+                node.opacity = node.opacity === 1 ? 0.2 : 1;
+                return node.opacity;
+            }
         }
+        return null;
+    };
+
+    // Delete note by ID
+    sandboxApi.deleteNoteById = function(noteId) {
+        const allNodes = editor.context.insertionParent.children;
+        for (const node of allNodes) {
+            if (node.addOnData && node.addOnData.getItem("noteId") === noteId) {
+                node.removeFromParent();
+                return true;
+            }
+        }
+        return false;
     };
 
     // Expose `sandboxApi` to the UI runtime.

@@ -1,5 +1,4 @@
 import addOnUISdk from "https://new.express.adobe.com/static/add-on-sdk/sdk.js";
-import { saveNotes, loadNotes, deleteNote } from "./store.js";
 
 addOnUISdk.ready.then(async () => {
     console.log("addOnUISdk is ready for use.");
@@ -23,14 +22,14 @@ addOnUISdk.ready.then(async () => {
     const fontColorInput = document.getElementById("fontColor");
     const fontFamilyInput = document.getElementById("fontFamily");
 
-    // Tab switching logic and notes storage
+    // Tab switching logic
     const tabViewBtn = document.getElementById("tab-view");
     const tabCreateBtn = document.getElementById("tab-create");
     const tabContentView = document.getElementById("tab-content-view");
     const tabContentCreate = document.getElementById("tab-content-create");
     const notesList = document.getElementById("notesList");
 
-    let notes = loadNotes();
+    let selectedNoteId = null;
 
     function switchTab(tab) {
         if (tab === "view") {
@@ -49,8 +48,14 @@ addOnUISdk.ready.then(async () => {
     tabViewBtn.addEventListener("click", () => switchTab("view"));
     tabCreateBtn.addEventListener("click", () => switchTab("create"));
 
-    function renderNotesList() {
-        if (notes.length === 0) {
+    // Instead of local notes, always fetch from backend
+    async function renderNotesList() {
+        const notes = await sandboxProxy.getAllNotes();
+        // If selectedNoteId is no longer present, clear selection
+        if (!notes.some(note => note.id === selectedNoteId)) {
+            selectedNoteId = null;
+        }
+        if (!notes || notes.length === 0) {
             notesList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">📝</div>
@@ -58,41 +63,65 @@ addOnUISdk.ready.then(async () => {
                     <div style="font-size: 12px; margin-top: 8px;">Create your first sticky note!</div>
                 </div>
             `;
+            updateControlButtons();
             return;
         }
         notesList.innerHTML = notes.map((note, idx) => `
-            <div class="note-card" style="background:${note.colorHex};" data-idx="${idx}">
-                <div class="note-content">${note.textHtml}</div>
+            <div class="note-card${note.id === selectedNoteId ? ' selected' : ''}" style="background:${note.meta.color};" data-id="${note.id}">
+                <div class="note-content">${note.meta.text.replace(/\n/g, '<br>')}</div>
                 <div class="note-metadata">
-                    <span>${note.width}×${note.height}px</span>
+                    <span>${note.meta.width}×${note.meta.height}px</span>
+                    <div class="note-actions">
+                        <button data-id="${note.id}" class="hide-note-btn${note.isHidden ? ' hidden' : ''}" title="${note.isHidden ? 'Show' : 'Hide'}">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                                ${note.isHidden ? '<line x1="1" y1="1" x2="23" y2="23"></line>' : ''}
+                            </svg>
+                        </button>
+                        <button data-id="${note.id}" class="delete-note-btn" title="Delete">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                    </div>
                 </div>
-                <button data-idx="${idx}" class="delete-note-btn">&times;</button>
             </div>
         `).join("");
-        // Add delete handlers
-        Array.from(notesList.querySelectorAll('.delete-note-btn')).forEach(btn => {
-            btn.addEventListener('click', e => {
+        // Add per-note hide/show handlers
+        Array.from(notesList.querySelectorAll('.hide-note-btn')).forEach(btn => {
+            btn.addEventListener('click', async e => {
                 e.stopPropagation();
-                const idx = parseInt(btn.getAttribute('data-idx'), 10);
-                notes = deleteNote(idx);
-                renderNotesList();
+                const noteId = btn.getAttribute('data-id');
+                await sandboxProxy.toggleNoteVisibilityById(noteId);
+                await renderNotesList();
             });
         });
-        // Add click handler to note cards
+        // Add per-note delete handlers
+        Array.from(notesList.querySelectorAll('.delete-note-btn')).forEach(btn => {
+            btn.addEventListener('click', async e => {
+                e.stopPropagation();
+                const noteId = btn.getAttribute('data-id');
+                await sandboxProxy.deleteNoteById(noteId);
+                if (selectedNoteId === noteId) selectedNoteId = null;
+                await renderNotesList();
+            });
+        });
+        // Add click handler to note cards for selection
         Array.from(notesList.querySelectorAll('.note-card')).forEach(card => {
             card.addEventListener('click', async e => {
-                const idx = parseInt(card.getAttribute('data-idx'), 10);
-                const note = notes[idx];
-                if (note) {
-                    await sandboxProxy.createStickyNote({
-                        colorHex: note.colorHex,
-                        width: note.width,
-                        height: note.height,
-                        text: note.textHtml.replace(/<br>/g, '\n').replace(/<[^>]+>/g, '')
-                    });
-                }
+                const noteId = card.getAttribute('data-id');
+                selectedNoteId = noteId;
+                await sandboxProxy.selectNoteById(noteId);
+                updateControlButtons();
+                await renderNotesList();
             });
         });
+        updateControlButtons();
+    }
+
+    function updateControlButtons() {
+        const hasSelection = !!selectedNoteId;
+        hideShowNoteButton.disabled = !hasSelection;
+        deleteNoteButton.disabled = !hasSelection;
     }
 
     createStickyNoteButton.addEventListener("click", async event => {
@@ -105,16 +134,7 @@ addOnUISdk.ready.then(async () => {
         const fontColor = fontColorInput.value;
         const fontFamily = fontFamilyInput.value;
         await sandboxProxy.createStickyNote({ colorHex, width, height, text, fontSize, fontColor, fontFamily });
-        // Add to notes list and switch to view tab
-        notes.push({
-            colorHex,
-            width,
-            height,
-            textHtml: text
-                .replace(/\n/g, '<br>')
-                .replace(/^- (.*)$/gm, '<span style="display:inline-block;width:1em;">•</span> $1')
-        });
-        saveNotes(notes);
+        selectedNoteId = null;
         renderNotesList();
         switchTab("view");
     });
@@ -122,15 +142,29 @@ addOnUISdk.ready.then(async () => {
     
     // Hide/Show note functionality
     hideShowNoteButton.addEventListener("click", async event => {
-        await sandboxProxy.toggleNoteVisibility();
+        if (selectedNoteId) {
+            await sandboxProxy.toggleNoteVisibilityById(selectedNoteId);
+            // After toggling, check if note still exists and update selection
+            const notes = await sandboxProxy.getAllNotes();
+            if (!notes.some(note => note.id === selectedNoteId)) {
+                selectedNoteId = null;
+            }
+            await renderNotesList();
+        }
     });
     hideShowNoteButton.disabled = false;
     
     // Delete note functionality
     deleteNoteButton.addEventListener("click", async event => {
-        await sandboxProxy.deleteSelectedNote();
+        if (selectedNoteId) {
+            await sandboxProxy.deleteNoteById(selectedNoteId);
+            selectedNoteId = null;
+            await renderNotesList();
+        }
     });
     deleteNoteButton.disabled = false;
     
+    // Initial render and default tab
+    switchTab("create");
     renderNotesList();
 });
