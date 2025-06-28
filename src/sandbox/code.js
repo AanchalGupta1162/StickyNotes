@@ -8,13 +8,6 @@ function start() {
     // APIs to be exposed to the UI runtime
     // i.e., to the `index.html` file of this add-on.
     const sandboxApi = {};
-    
-    // Helper to generate a unique ID
-    function generateNoteId() {
-        return typeof crypto !== "undefined" && crypto.randomUUID
-            ? crypto.randomUUID()
-            : "note-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
-    }
 
     // Create a sticky note
     sandboxApi.createStickyNote = function(options) {
@@ -56,16 +49,28 @@ function start() {
         rect.translation = { x: 10, y: 10 };
         const rectFill = editor.makeColorFill(color);
         rect.fill = rectFill;
-        // Add rounded corners to the rectangle
-        rect.cornerRadii = { topLeft: 12, topRight: 12, bottomLeft: 12, bottomRight: 12 };
+        
+        // Group rectangle and text if possible
+        const group = editor.createGroup();
+        group.translation = { x: 10, y: 10 }; // Align group to the same position as the rectangle
+        group.children.append(rect);
 
         // Create the text object for the sticky note
         const text = editor.createText(textContent);
+        group.children.append(text);
+
+        // Apply auto-height layout
+        text.layout = {
+            type: 2, // Set layout type to autoHeight
+            width: width - 20 // Specify a width for the text node
+        };
+
         text.setPositionInParent(
-            { x: 10, y:10  },
-            { x: 10, y: 10 }
+            { x: 20, y: 20 },
+            { x: 0, y: 0 } // Use a consistent reference point
         );
-        text.textAlignment=1; // Align text to the left
+        text.textAlignment = 1; // Center alignment
+        console.log(text.layout);
         // Font customization
         const fontSize = options.fontSize || 12;
         // Convert hex color to {red, green, blue, alpha}
@@ -88,20 +93,7 @@ function start() {
             fontFamily: fontFamily
         });
         
-        // Set text bounds to fit within the rectangle with padding
-        const padding = 15;
-        text.areaBox = {
-            width: width - (padding * 2),
-            height: height - (padding * 2)
-        };
-        
-        // Position text inside the rectangle with padding
-        text.translation = { x: rect.translation.x + padding, y: rect.translation.y + padding };
-
-        // Group rectangle and text if possible
-        const group = editor.createGroup();
-        group.translation = { x: 10, y: 10 }; // Align group to the same position as the rectangle
-        group.children.append(rect,text);
+        // text.resizeToFitWithin(width, height);
         editor.context.insertionParent.children.append(group);
         
         // Store reference to the current note
@@ -119,18 +111,6 @@ function start() {
         group.addOnData.setItem("noteId", noteId);
         group.addOnData.setItem("meta", JSON.stringify(meta));
         
-        // Add to the document
-        // const insertionParent = editor.context.insertionParent;
-        // if (group) {
-        //     insertionParent.children.append(group);
-        // } else {
-        //     insertionParent.children.append(rect);
-        //     insertionParent.children.append(text);
-        // }
-        // Add to the document
-        // const insertionParent = editor.context.insertionParent;
-        // insertionParent.children.append(rect);
-        // insertionParent.children.append(text);
     };
     
     // Get all notes (groups with noteId in addOnData)
@@ -168,7 +148,7 @@ function start() {
         const allNodes = editor.context.insertionParent.children;
         for (const node of allNodes) {
             if (node.addOnData && node.addOnData.getItem("noteId") === noteId) {
-                node.opacity = node.opacity === 1 ? 0.2 : 1;
+                node.opacity = node.opacity === 1 ? 0.01 : 1;
                 return node.opacity;
             }
         }
