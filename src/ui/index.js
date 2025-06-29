@@ -31,12 +31,13 @@ addOnUISdk.ready.then(async () => {
 
     let selectedNoteId = null;
 
-    function switchTab(tab) {
+    async function switchTab(tab) {
         if (tab === "view") {
             tabViewBtn.classList.add("active");
             tabCreateBtn.classList.remove("active");
             tabContentView.style.display = "block";
             tabContentCreate.style.display = "none";
+            await renderNotesList(); // Refresh notes list when switching to view tab
         } else {
             tabViewBtn.classList.remove("active");
             tabCreateBtn.classList.add("active");
