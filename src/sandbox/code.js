@@ -72,25 +72,11 @@ function start() {
         text.textAlignment = 1; // Center alignment
         console.log(text.layout);
         // Font customization
-        const fontSize = options.fontSize || 12;
-        // Convert hex color to {red, green, blue, alpha}
-        function hexToRgbA(hex) {
-            let c = hex.substring(1);
-            if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
-            const num = parseInt(c, 16);
-            return {
-                red: ((num >> 16) & 255) / 255,
-                green: ((num >> 8) & 255) / 255,
-                blue: (num & 255) / 255,
-                alpha: 1
-            };
-        }
+        const fontSize = options.fontSize || 20; // Increased default font size from 12 to 16
         const fontColor = options.fontColor ? hexToRgbA(options.fontColor) : { red: 0, green: 0, blue: 0, alpha: 1 };
-        const fontFamily = options.fontFamily || "Arial";
         text.fullContent.applyCharacterStyles({
             color: fontColor,
-            fontSize: fontSize,
-            fontFamily: fontFamily
+            fontSize: fontSize
         });
         
         // text.resizeToFitWithin(width, height);
@@ -105,8 +91,7 @@ function start() {
             height,
             text: options.text,
             fontSize,
-            fontColor: options.fontColor,
-            fontFamily: options.fontFamily
+            fontColor: options.fontColor
         };
         group.addOnData.setItem("noteId", noteId);
         group.addOnData.setItem("meta", JSON.stringify(meta));

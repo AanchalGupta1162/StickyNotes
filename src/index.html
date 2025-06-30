@@ -50,36 +50,22 @@
                     </div>
                     
                     <div class="form-group">
+                        <label for="noteText">Note Content</label>
+                        <textarea id="noteText" rows="2" placeholder="Type your note here. Use - for bullet."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
                         <label>Font Options</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
-                            <div style="display: flex; align-items: center; gap: 3px;">
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 3px; flex: 1;">
                                 <label for="fontSize" style="margin: 0; font-size: 11px; min-width: 26px;">Size</label>
-                                <input type="number" id="fontSize" value="12" min="8" max="36" style="flex: 1; height: 28px; font-size: 11px;">
+                                <input type="number" id="fontSize" value="20" min="8" max="36" style="flex: 1; height: 28px; font-size: 11px;">
                             </div>
-                            <div style="display: flex; align-items: center; gap: 3px;">
+                            <div style="display: flex; align-items: center; gap: 3px; flex: 1;">
                                 <label for="fontColor" style="margin: 0; font-size: 11px;">Color</label>
                                 <input type="color" id="fontColor" value="#000000" style="flex: 1; height: 28px; padding: 2px;">
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 3px;">
-                            <label for="fontFamily" style="margin: 0; font-size: 11px; min-width: 30px;">Font</label>
-                            <select id="fontFamily" style="flex: 1; height: 28px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 11px; padding: 0 6px;">
-                                <option value="Arial">Arial</option>
-                                <option value="Helvetica">Helvetica</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Trebuchet MS">Trebuchet MS</option>
-                                <option value="Comic Sans MS">Comic Sans MS</option>
-                                <option value="Impact">Impact</option>
-                                <option value="Courier New">Courier New</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="noteText">Note Content</label>
-                        <textarea id="noteText" rows="2" placeholder="Type your note here. Use - for bullet."></textarea>
                     </div>
                     
                     <div class="form-group">
