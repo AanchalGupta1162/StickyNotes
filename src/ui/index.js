@@ -20,6 +20,7 @@ addOnUISdk.ready.then(async () => {
     const noteTextInput = document.getElementById("noteText");
     const fontSizeInput = document.getElementById("fontSize");
     const fontColorInput = document.getElementById("fontColor");
+    const fontFamilyInput = document.getElementById("fontFamily");
 
     // Tab switching logic
     const tabViewBtn = document.getElementById("tab-view");
@@ -125,14 +126,15 @@ addOnUISdk.ready.then(async () => {
     }
 
     createStickyNoteButton.addEventListener("click", async event => {
-        // Get color, size, text, font size, and font color
+        // Get color, size, text, font size, font color, and font family
         const colorHex = noteColorInput.value;
         const width = parseInt(noteWidthInput.value, 10);
         const height = parseInt(noteHeightInput.value, 10);
         const text = noteTextInput.value;
         const fontSize = parseInt(fontSizeInput.value, 10);
         const fontColor = fontColorInput.value;
-        await sandboxProxy.createStickyNote({ colorHex, width, height, text, fontSize, fontColor });
+        const fontFamily = fontFamilyInput.value; // This is now the PostScript name
+        await sandboxProxy.createStickyNote({ colorHex, width, height, text, fontSize, fontColor, fontFamily });
         selectedNoteId = null;
         renderNotesList();
         switchTab("view");

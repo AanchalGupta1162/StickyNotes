@@ -1,9 +1,8 @@
 import addOnSandboxSdk from "add-on-sdk-document-sandbox";
-import { editor } from "express-document-sdk";
+import { editor, fonts } from "express-document-sdk";
 
 // Get the document sandbox runtime.
 const { runtime } = addOnSandboxSdk.instance;
-
 function start() {
     // APIs to be exposed to the UI runtime
     // i.e., to the `index.html` file of this add-on.
@@ -81,7 +80,7 @@ function start() {
         
         // text.resizeToFitWithin(width, height);
         editor.context.insertionParent.children.append(group);
-        
+
         // Store reference to the current note
         const noteId = rect.id.toString();
         const meta = {
@@ -91,11 +90,27 @@ function start() {
             height,
             text: options.text,
             fontSize,
-            fontColor: options.fontColor
+            fontColor: options.fontColor,
+            fontFamily: options.fontFamily
         };
         group.addOnData.setItem("noteId", noteId);
         group.addOnData.setItem("meta", JSON.stringify(meta));
-        
+
+        // Load and apply font after insertion
+        if (options.fontFamily) {
+            fonts.fromPostscriptName(options.fontFamily).then(fontObj => {
+                if (!fontObj) return;
+                const contentLength = (typeof text.fullContent.getLength === "function")
+                    ? text.fullContent.getLength()
+                    : (typeof text.fullContent.length === "number" ? text.fullContent.length : (text.fullContent.text ? text.fullContent.text.length : 0));
+                editor.queueAsyncEdit(() => {
+                    text.fullContent.applyCharacterStyles(
+                        { font: fontObj, fontSize: fontSize },
+                        { start: 0, length: contentLength }
+                    );
+                });
+            });
+        }
     };
     
     // Get all notes (groups with noteId in addOnData)

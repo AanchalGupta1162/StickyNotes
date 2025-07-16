@@ -56,16 +56,40 @@
                     
                     <div class="form-group">
                         <label>Font Options</label>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 3px; flex: 1;">
+                        <div class="font-options-row" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 3px; min-width: 80px; flex: 1;">
                                 <label for="fontSize" style="margin: 0; font-size: 11px; min-width: 26px;">Size</label>
-                                <input type="number" id="fontSize" value="20" min="8" max="36" style="flex: 1; height: 28px; font-size: 11px;">
+                                <input type="number" id="fontSize" value="20" min="8" max="36" style="flex: 1; height: 28px; font-size: 11px; min-width: 40px;">
                             </div>
-                            <div style="display: flex; align-items: center; gap: 3px; flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 3px; min-width: 80px; flex: 1;">
                                 <label for="fontColor" style="margin: 0; font-size: 11px;">Color</label>
-                                <input type="color" id="fontColor" value="#000000" style="flex: 1; height: 28px; padding: 2px;">
+                                <input type="color" id="fontColor" value="#000000" style="flex: 1; height: 28px; padding: 2px; min-width: 40px;">
                             </div>
                         </div>
+                        <div style="display: flex; align-items: center; gap: 3px; min-width: 120px; margin-top: 8px;">
+                            <label for="fontFamily" style="margin: 0; font-size: 11px;">Font</label>
+                            <select id="fontFamily" style="flex: 1; height: 28px; font-size: 11px; min-width: 100px; max-width: 140px;">
+                                    <option value="SourceSans3-Regular">Source Sans 3 Regular</option>
+                                    <option value="Bungee-Regular">Bungee Regular</option>
+                                    <option value="Lato-Light">Lato-Light</option>
+                                    <option value="AbrilFatface-Regular">Abril Fatface</option>
+                                    <option value="ACaslonPro-Semibold">Adobe Caslon Pro</option>
+                            </select>
+                        </div>
+                        <style>
+                        @media (max-width: 480px) {
+                            .font-options-row {
+                                flex-direction: row !important;
+                                gap: 4px !important;
+                            }
+                            .font-options-row > div,
+                            .font-options-row + div {
+                                min-width: unset !important;
+                                width: 100% !important;
+                                margin-top: 4px !important;
+                            }
+                        }
+                        </style>
                     </div>
                     
                     <div class="form-group">
